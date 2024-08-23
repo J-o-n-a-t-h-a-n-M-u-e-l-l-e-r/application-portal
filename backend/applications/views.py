@@ -3,11 +3,13 @@ import os
 from knox.auth import TokenAuthentication
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from authentication.permissions import IsStaffMember
+from constants import PAGE_SIZE
 from .models import Application, Student, Comment, ApplicationFile
 from .serializers import ApplicationSerializer, StudentSerializer, CommentSerializer, \
     PostApplicationSerializer
@@ -22,6 +24,11 @@ class ApplicationList(APIView):
 
     def get(self, request, format=None):
         applications = Application.objects.all()
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(applications, request)
+        if page is not None:
+            serializer = ApplicationSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         serializer = ApplicationSerializer(applications, many=True)
         return Response(serializer.data)
 
@@ -221,7 +228,18 @@ class ApplicationListPrefetch(APIView):
     permission_classes = (IsAuthenticated, IsStaffMember,)
 
     def get(self, request, format=None):
-        files = ApplicationFile.objects.all()
         url = os.environ.get('API_URL')
-        files = [url + file.file.url for file in files]
-        return Response(files)
+        prefetch_all = request.query_params.get('all', 'false').lower() == 'true'
+        if prefetch_all:
+            applications = Application.objects.all()
+            files = ApplicationFile.objects.all()
+            files = [url + file.file.url for file in files]
+            return Response(files)
+        else:
+            # fetch the files of the first page of applications
+            applications = Application.objects.all()[:PAGE_SIZE]
+            files = []
+            for application in applications:
+                for file in application.files.all():
+                    files.append(url + file.file.url)
+            return Response(files)

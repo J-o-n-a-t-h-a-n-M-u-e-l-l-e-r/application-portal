@@ -22,10 +22,10 @@ export default defineConfig({
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: "html",
     /* Set the timeout */
-    timeout: 120000,
+    timeout: 12000000,
     /* Set expect timeout */
     expect: {
-        timeout: 30000,
+        timeout: 3000000,
     },
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
@@ -47,12 +47,12 @@ export default defineConfig({
             name: 'firefox',
             use: {...devices['Desktop Firefox']},
         },
-    
+
         {
             name: 'webkit',
             use: {...devices['Desktop Safari']},
         },
-    */
+*/
         /* Test against mobile viewports. */
         // {
         //   name: 'Mobile Chrome',

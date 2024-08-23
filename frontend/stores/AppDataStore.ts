@@ -1,8 +1,8 @@
 import { defineStore } from "pinia"
 import type { Ref } from "vue"
 import { FetchError } from "ofetch"
-import { STUDENTS_ENDPOINT } from "~/server/endpoints"
 // import type { StorageLike } from "pinia-plugin-persistedstate"
+import { STUDENTS_ENDPOINT } from "~/server/endpoints"
 
 export const useAppDataStore = defineStore(
     "appdata",
@@ -13,8 +13,12 @@ export const useAppDataStore = defineStore(
         const isStoragePersisted = ref(false)
         const isNotificationsGranted = ref(false)
 
-        async function init() {
-            await applications.getApplications()
+        async function init(fetchAll: boolean = false) {
+            if (fetchAll) {
+                await applications.getAllApplications()
+            } else {
+                await applications.getApplications(applications.loadCurrentPage())
+            }
             await fetchStudents()
         }
 

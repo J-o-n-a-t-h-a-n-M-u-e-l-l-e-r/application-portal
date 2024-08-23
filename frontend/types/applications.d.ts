@@ -20,6 +20,21 @@ interface Document {
     type: string
 }
 
+interface ApplicationList {
+    count: number
+    next: string | null
+    previous: string | null
+    results: Application[]
+}
+
+interface ApplicationsPageMap {
+    [key: number]: number[]
+}
+
+interface ApplicationMap {
+    [key: number]: Application
+}
+
 type RegisterUser = {
     id: number
     first_name: string

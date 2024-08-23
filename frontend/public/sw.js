@@ -1,6 +1,6 @@
 import { BackgroundSyncPlugin } from "workbox-background-sync"
 import { offlineFallback, warmStrategyCache } from "workbox-recipes"
-import { NetworkOnly, StaleWhileRevalidate } from "workbox-strategies"
+import { CacheFirst, NetworkOnly, StaleWhileRevalidate } from "workbox-strategies"
 import { registerRoute } from "workbox-routing"
 import { CacheableResponsePlugin } from "workbox-cacheable-response"
 import { ExpirationPlugin } from "workbox-expiration"
@@ -11,7 +11,6 @@ cleanupOutdatedCaches()
 // Precache all static assets identified by the Webpack manifest
 precacheAndRoute(self.__WB_MANIFEST)
 
-// Set up page caches (stale-while-revalidate and cache-first) for app pages
 const pageCache = new StaleWhileRevalidate({
     cacheName: "page-cache",
     plugins: [
@@ -24,7 +23,23 @@ const pageCache = new StaleWhileRevalidate({
     ],
 })
 
-registerRoute(({ request }) => request.mode === "navigate", pageCache)
+// Set up page caches (stale-while-revalidate and cache-first) for app pages
+registerRoute(({ request }) => request.mode === "navigate" && getNetworkScore() > 2, pageCache)
+
+registerRoute(
+    ({ request }) => request.mode === "navigate" && getNetworkScore() < 3,
+    new CacheFirst({
+        cacheName: "page-cache",
+        plugins: [
+            new CacheableResponsePlugin({
+                statuses: [0, 200],
+            }),
+            new ExpirationPlugin({
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+            }),
+        ],
+    }),
+)
 
 // Warm the page cache with the most important pages
 warmStrategyCache({
@@ -32,9 +47,9 @@ warmStrategyCache({
     strategy: pageCache,
 })
 
-// Set up asset cache for style, script, and worker files, critical for the application to work
+// Set up asset cache (stale-while-revalidate and cache-first) for style, script, and worker files, critical for the application to work
 registerRoute(
-    ({ request }) => ["style", "script", "worker"].includes(request.destination),
+    ({ request }) => ["style", "script", "worker"].includes(request.destination) && getNetworkScore() > 2,
     new StaleWhileRevalidate({
         cacheName: "asset-cache",
         plugins: [
@@ -45,10 +60,40 @@ registerRoute(
     }),
 )
 
-// Set up documents cache (stale-while-revalidate) for documents
 registerRoute(
-    ({ request }) => request.url.includes("/media/documents/"),
+    ({ request }) => ["style", "script", "worker"].includes(request.destination) && getNetworkScore() < 3,
+    new CacheFirst({
+        cacheName: "asset-cache",
+        plugins: [
+            new CacheableResponsePlugin({
+                statuses: [0, 200],
+            }),
+            new ExpirationPlugin({
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+            }),
+        ],
+    }),
+)
+
+// Set up documents cache (stale-while-revalidate and cache-first) for documents
+registerRoute(
+    ({ request }) => request.url.includes("/media/documents/") && getNetworkScore() > 2,
     new StaleWhileRevalidate({
+        cacheName: "documents-cache",
+        plugins: [
+            new CacheableResponsePlugin({
+                statuses: [0, 200],
+            }),
+            new ExpirationPlugin({
+                maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+            }),
+        ],
+    }),
+)
+
+registerRoute(
+    ({ request }) => request.url.includes("/media/documents/") && getNetworkScore() < 3,
+    new CacheFirst({
         cacheName: "documents-cache",
         plugins: [
             new CacheableResponsePlugin({
@@ -94,6 +139,25 @@ registerRoute(
     }),
     "DELETE",
 )
+
+// Returns a network score based on the effective network type
+function getNetworkScore() {
+    if (navigator.connection) {
+        if (navigator.connection.effectiveType === "slow-2g") {
+            return 1
+        }
+        if (navigator.connection.effectiveType === "2g" || navigator.connection.saveData) {
+            return 2
+        }
+        if (navigator.connection.effectiveType === "3g") {
+            return 3
+        }
+        if (navigator.connection.effectiveType === "4g") {
+            return 4
+        }
+    }
+    return 4
+}
 
 // Event listener for the installation event of the service worker
 self.addEventListener("install", () => {

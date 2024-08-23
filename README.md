@@ -1,147 +1,31 @@
-# Application Portal
+# Network-Optimized Application Portal
 
-This project was created as part of my bachelor thesis. The goal was to explore the offline capabilities of web apps in the form of a progressive web app (PWA). To achieve this, I
-created a simple application portal that allows users to either register as students and apply for a course or as staff members to review and accept these applications. The process
-of reviewing, committing, and accepting applications is possible offline and will sync with the server once the user is online again.
+This branch contains the network-optimized version of the application portal along with the Playwright tests used to run the experiments and the results of those experiments.
 
-![Application Portal](/frontend/public/img/screenshots_mockup.png)
+## Changes Made to the Original Version
 
-## Structure
+As described in the thesis, we have made the following changes to the original version of the PWA to optimize it for network conditions:
 
-According to the thesis, this repository contains all three web applications separated into their own branches:
+1. **Pagination**: Added pagination to the list of applications to reduce the number of applications loaded at once.
+2. **Network Score**: Added a network score calculated based on the effective network type and the round-trip time of the network.
+3. **Optimized Cache**: Based on the network score, the service worker uses a cache-first strategy instead of a stale-while-revalidate strategy to serve pages, documents, and
+   assets.
 
-- *main*: The fully offline-capable application portal
-- *network-optimized-pwa*: The network-optimized version of the main PWA used in the experiments, containing all related information in the README of the branch
-- *no-pwa*: The version of the application portal without any PWA capabilities used as a baseline in the experiments
+### Optimizations Not Part of the Experiments
 
-## Technologies
+We have optimized the application further, but these optimizations were not included in the experiments to maintain fair comparisons. Therefore, we have noted every place where we
+adapted the code for
+the execution of our experiments with the comment tag `NOTE`.
 
-Short overview of the main technologies used in this project.
+4. **Dynamic Prefetching**: Adapted the prefetching strategy of the original PWA to prefetch only the first page, all the pages, or none of the pages based on the network score.
+5. **Conditional Documents Loading**: If the documents of an application have not been loaded yet and the network score is low, the documents are not loaded until the user manually
+   clicks the download
+   button.
+6. **Custom Web Worker**: Implemented a custom web worker to download documents asynchronously, notifying the client once the download is finished.
 
-### Frontend
+## Experiments
 
-- [Nuxt.js](https://nuxtjs.org/)
-- [Vue.js](https://vuejs.org/)
-- [Pinia](https://pinia.esm.dev/)
-- [Pinia-Plugin-PersistedState](https://prazdevs.github.io/pinia-plugin-persistedstate/)
-- [PWA Vite Plugin](https://vite-pwa-org.netlify.app/)
-- [shadcn-Vue](https://shadcn-vue.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Workbox](https://developers.google.com/web/tools/workbox)
-- [Playwright](https://playwright.dev/)
-
-### Backend
-
-- [Django](https://www.djangoproject.com/)
-- [Django REST Framework](https://www.django-rest-framework.org/)
-- [Django-Rest-Knox](https://github.com/jazzband/django-rest-knox)
-
-## Setup
-
-### Prequisites
-
-I used the following versions for development, so ensure you have at least these versions installed:
-
-- Node.js - `v20.11.1`
-- npm - `v10.2.4`
-- Python - `v3.12.4`
-
-### Installation
-
-First, clone the repository.
-
-#### Backend
-
-For setting up the backend, it is recommended to create a virtual environment:
-
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-
-Then install the required packages:
-
-```bash
-cd backend/
-pip install -r requirements.txt
-```
-
-Now you need to create a PostgreSQL database. You can either set up a local database or use a cloud service for this.
-Create a `.env` file in the backend directory and add the following environment variables:
-
-```bash
-SECRET_KEY=your_secret_key
-DEBUG=True
-DATABASE_URL=postgres://user:password@localhost:5432/db_name
-API_URL=http://localhost:8000
-```
-
-Replace the `SECRET_KEY` with a random secret key which you can generate in the Django shell with the following command:
-
-```bash
-python manage.py shell
-from django.core.management.utils import get_random_secret_key  
-get_random_secret_key()
-```
-
-Replace the `DATABASE_URL` with your database credentials.
-
-Now you can run the migrations with the following two commands:
-
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
-Create a superuser for the Django admin:
-
-```bash
-python manage.py createsuperuser
-```
-
-#### Frontend
-
-To set up the frontend, navigate to the `frontend` directory:
-
-```bash
-cd frontend
-```
-
-Install the required packages:
-
-```bash
-npm install
-```
-
-Create a `.env` file in the `frontend` directory and add the following environment variables:
-
-```bash
-NUXT_ENCRYPTION_KEY="your_encryption_key"
-NUXT_API_URL="http://localhost:8000"
-NUXT_APP_URL="http://localhost:3000/"
-```
-
-Replace the `NUXT_ENCRYPTION_KEY` with a random string containing at least 10 characters.
-
-## Development Server
-
-Start the Django development server on `http://localhost:8000`:
-
-```bash
-python manage.py runserver
-```
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-npm run dev
-```
-
-For testing the service worker and full offline capabilities, use the preview command instead of dev:
-
-```bash
-npm run build
-npm run preview
-```
-
-Feel free to explore the application by registering as a student or staff member and checking out the offline capabilities.
+The Playwright file used to run the experiments can be found in [frontend/tests/example.spec.ts](frontend/tests/example.spec.ts), and the configuration file for Playwright can be
+found in
+[frontend/playwright.config.ts](frontend/playwright.config.ts).
+All the CSV files generated by the Playwright tests can be found in the [analysis/experiments](analysis/experiments) directory.

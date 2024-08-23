@@ -49,6 +49,7 @@ export const useAuthStore = defineStore(
             token.value = data!.token
             expires.value = data!.expiry
             await profile()
+            // NOTE Here we disabled prefetching for experiments
             if (isStaff.value) {
                 prefetchData(data!.token)
             }
