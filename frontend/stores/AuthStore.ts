@@ -1,7 +1,6 @@
 import type { Ref } from "vue"
 import { FetchError } from "ofetch"
 import { LOGIN_ENDPOINT, LOGOUT_ALL_ENDPOINT, LOGOUT_ENDPOINT, PROFILE_ENDPOINT, REGISTER_ENDPOINT } from "~/server/endpoints"
-import { prefetch } from "~/server/prefetching"
 
 export const useAuthStore = defineStore(
     "auth",
@@ -36,11 +35,6 @@ export const useAuthStore = defineStore(
             })
         }
 
-        const prefetchData = async (token: string) => {
-            await prefetch(token)
-            location.reload()
-        }
-
         const login = async (username: string, password: string) => {
             const data = await $fetch<{ expiry: string; token: string }>(LOGIN_ENDPOINT, {
                 method: "POST",
@@ -49,9 +43,6 @@ export const useAuthStore = defineStore(
             token.value = data!.token
             expires.value = data!.expiry
             await profile()
-            if (isStaff.value) {
-                prefetchData(data!.token)
-            }
         }
 
         const logout = async () => {

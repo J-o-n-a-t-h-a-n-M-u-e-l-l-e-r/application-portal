@@ -10,21 +10,6 @@ export const useNetworkStore = defineStore("network", () => {
 
     function updateOnlineStatus() {
         isOnline.value = navigator.onLine
-        // Trigger Background Sync queue if online
-        if (isOnline.value) {
-            if ("serviceWorker" in navigator && "SyncManager" in window) {
-                navigator.serviceWorker.ready.then((registration) => {
-                    registration.sync
-                        .register("syncData")
-                        .then(() => {
-                            console.log("Sync registered")
-                        })
-                        .catch((e) => {
-                            console.log("Sync registration failed", e)
-                        })
-                })
-            }
-        }
     }
 
     function updateNetworkInfo() {
@@ -34,6 +19,28 @@ export const useNetworkStore = defineStore("network", () => {
             rtt.value = navigator.connection.rtt
             isSavingData.value = navigator.connection.saveData
         }
+    }
+
+    // Score from 0 to 4 based on network quality
+    function getNetworkScore() {
+        if (navigator.connection) {
+            if (!isOnline.value) {
+                return 0
+            }
+            if (networkType.value === "slow-2g") {
+                return 1
+            }
+            if (networkType.value === "2g" || isSavingData.value) {
+                return 2
+            }
+            if (networkType.value === "3g") {
+                return 3
+            }
+            if (networkType.value === "4g") {
+                return 4
+            }
+        }
+        return 4
     }
 
     function startAutoUpdate() {
@@ -59,6 +66,7 @@ export const useNetworkStore = defineStore("network", () => {
         bandwidth,
         rtt,
         isSavingData,
+        getNetworkScore,
         startAutoUpdate,
         stopAutoUpdate,
     }

@@ -52,39 +52,3 @@ test.describe("simple online tests", () => {
         await expect(page.locator("tbody")).toContainText(status)
     })
 })
-
-test.describe("offline tests", () => {
-    test.beforeEach(async ({ page }) => {
-        await page.goto(appURL)
-        await page.waitForLoadState("networkidle")
-        await page.getByPlaceholder("Enter Username").click()
-        await page.getByPlaceholder("Enter Username").fill("Boss")
-        await page.getByPlaceholder("Enter Password").click()
-        await page.getByPlaceholder("Enter Password").fill("123456")
-        await page.getByRole("button", { name: "Login" }).click()
-        await page.waitForLoadState("networkidle")
-        await expect(page.getByRole("heading", { name: "Application Portal" })).toBeVisible()
-        await expect(page.getByTestId("network-status")).toContainText("🟢")
-        await page.getByRole("link", { name: "Applications" }).click()
-        await expect(page.locator("h1")).toContainText("Applications")
-        await page.reload({ waitUntil: "load", timeout: 60000 })
-        await page.context().setOffline(true)
-        await page.reload()
-        await page.waitForTimeout(5000)
-        await expect(page.getByTestId("network-status")).toContainText("🔴")
-    })
-
-    test.afterEach(async ({ page }) => {
-        await page.context().setOffline(false)
-        await page.reload()
-        await page.getByText("Logout").click()
-        await expect(page.getByText("Login Register LoginEnter")).toBeVisible()
-    })
-
-    test("all accessible under offline", async ({ page }) => {
-        await page.getByTestId("edit-application").first().click()
-        await expect(page.getByTestId("application-status")).toBeVisible()
-        await expect(page.getByTestId("application-subject")).toBeVisible()
-        await expect(page.getByTestId("application-student-name")).toBeVisible()
-    })
-})

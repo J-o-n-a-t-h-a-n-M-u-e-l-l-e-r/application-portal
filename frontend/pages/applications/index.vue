@@ -1,11 +1,20 @@
 <script setup lang="ts">
+import { PAGE_SIZE } from "assets/constants"
 import Pencil2Icon from "~/components/icons/Pencil-2-Icon.vue"
 
 const applicationsStore = useApplicationsStore()
 const appDataStore = useAppDataStore()
+const networkStore = useNetworkStore()
+const currentPage = ref(applicationsStore.loadCurrentPage())
 
 onMounted(() => {
-    applicationsStore.getApplications()
+    currentPage.value = applicationsStore.loadCurrentPage()
+    applicationsStore.getApplications(currentPage.value)
+})
+
+watch(currentPage, (newPage) => {
+    applicationsStore.getApplications(newPage)
+    applicationsStore.saveCurrentPage(newPage)
 })
 </script>
 
@@ -22,15 +31,15 @@ onMounted(() => {
                     <TableHead> Created At</TableHead>
                 </TableRow>
             </TableHeader>
-            <TableBody v-if="applicationsStore.pending && applicationsStore.applications.length === 0">
-                <TableRow>
+            <TableBody v-if="applicationsStore.applicationPageMap[currentPage] === undefined">
+                <TableRow v-for="n in PAGE_SIZE" :key="n">
                     <TableCell colspan="6">
                         <Skeleton class="h-10 w-full" />
                     </TableCell>
                 </TableRow>
             </TableBody>
             <TableBody v-else>
-                <TableRow v-for="application in applicationsStore.applications" :key="application.id">
+                <TableRow v-for="application in applicationsStore.getApplicationsByPage(currentPage)" :key="application.id">
                     <TableCell>{{ application.student.first_name + " " + application.student.last_name }}</TableCell>
                     <TableCell>{{ application.status }}</TableCell>
                     <TableCell>{{ application.subject }}</TableCell>
@@ -46,6 +55,33 @@ onMounted(() => {
                 </TableRow>
             </TableBody>
         </Table>
+        <Pagination
+            v-slot="{ page }"
+            :page="currentPage"
+            :total="applicationsStore.count"
+            :items-per-page="PAGE_SIZE"
+            :sibling-count="5"
+            :default-page="1"
+            class="flex justify-center"
+            show-edges
+            @update:page="currentPage = $event"
+        >
+            <PaginationList v-slot="{ items }" class="flex items-center gap-1">
+                <template v-for="(item, index) in items">
+                    <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
+                        <Button
+                            class="w-10 h-10 p-0"
+                            :variant="item.value === page ? 'default' : 'outline'"
+                            :disabled="applicationsStore.getApplicationsByPage(item.value).length === 0 && !networkStore.isOnline"
+                            @click="currentPage = item.value"
+                        >
+                            {{ item.value }}
+                        </Button>
+                    </PaginationListItem>
+                    <PaginationEllipsis v-else :key="item.type" :index="index" />
+                </template>
+            </PaginationList>
+        </Pagination>
     </div>
 </template>
 

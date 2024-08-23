@@ -17,7 +17,21 @@ interface Document {
     updated_at: string
     file: string
     application: number
-    type: string
+}
+
+interface ApplicationList {
+    count: number
+    next: string | null
+    previous: string | null
+    results: Application[]
+}
+
+interface ApplicationsPageMap {
+    [key: number]: number[]
+}
+
+interface ApplicationMap {
+    [key: number]: Application
 }
 
 type RegisterUser = {

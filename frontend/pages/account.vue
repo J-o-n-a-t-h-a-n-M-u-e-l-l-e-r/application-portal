@@ -66,6 +66,10 @@ const requestNotificationPermission = async () => {
                 <Badge v-if="networkStore.isSavingData" variant="destructive">On</Badge>
                 <Badge v-else>Off</Badge>
             </div>
+            <div>
+                <p class="inline-block mr-2">Network Score:</p>
+                <Badge>{{ networkStore.getNetworkScore() }}</Badge>
+            </div>
         </div>
     </div>
 </template>

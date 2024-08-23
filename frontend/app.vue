@@ -20,7 +20,6 @@ onUnmounted(() => {
 <template>
     <Toaster />
     <div>
-        <VitePwaManifest />
         <NuxtLayout>
             <NuxtPage />
         </NuxtLayout>

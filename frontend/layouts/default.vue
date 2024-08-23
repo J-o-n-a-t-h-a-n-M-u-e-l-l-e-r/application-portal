@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { navigationMenuTriggerStyle } from "~/components/ui/navigation-menu"
-import { useToast } from "~/components/ui/toast/use-toast"
-import { ToastAction } from "~/components/ui/toast"
 
 const networkStore = useNetworkStore()
 const authStore = useAuthStore()
 const appDataStore = useAppDataStore()
+
 const router = useRouter()
-const { $pwa } = useNuxtApp()
-const { toast } = useToast()
 
 // Request persistent storage permission
 if (navigator.storage && navigator.storage.persist) {
@@ -17,36 +14,10 @@ if (navigator.storage && navigator.storage.persist) {
 } else {
     console.log("Persistent storage not supported")
 }
-
 const logout = async () => {
     await authStore.logout()
     await router.push("/login")
 }
-
-watch(
-    () => $pwa?.needRefresh,
-    (value) => {
-        if (value) {
-            toast({
-                duration: 10000,
-                title: "New Version is Available",
-                description: "A new version of the site is available. Click the refresh button to update.",
-                action: h(
-                    ToastAction,
-                    {
-                        altText: "Refresh",
-                        onClick: () => {
-                            $pwa?.updateServiceWorker()
-                        },
-                    },
-                    {
-                        default: () => "Refresh",
-                    },
-                ),
-            })
-        }
-    },
-)
 </script>
 
 <template>
