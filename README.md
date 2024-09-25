@@ -1,6 +1,8 @@
 # Application Portal
 
-This project was created as part of my bachelor thesis. The goal was to explore the offline capabilities of web apps in the form of a progressive web app (PWA). To achieve this, I
+This project was developed as part of my bachelor thesis at the [Big Data Analytics Group](https://bigdata.uni-saarland.de/index.php) under the supervision of [Prof. Dr. Jens Dittrich](https://bigdata.uni-saarland.de/people/dittrich.php), who gave me the original idea for this project.
+
+The goal was to explore the offline capabilities of web apps in the form of a progressive web app (PWA). To achieve this, I
 created a simple application portal that allows users to either register as students and apply for a course or as staff members to review and accept these applications. The process
 of reviewing, committing, and accepting applications is possible offline and will sync with the server once the user is online again.
 
