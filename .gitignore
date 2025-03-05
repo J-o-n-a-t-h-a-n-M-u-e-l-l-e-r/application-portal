@@ -1,7 +1,17 @@
+# Development environment
 /.idea/
-/backend/media/
 /env/
-*/DS_Store
-*/__pycache__/
-*/.env
 /venv/
+
+# Django / Python
+/backend/media/
+**/__pycache__/
+
+# Environment variables
+*/.env
+
+# MacOS
+*.DS_Store
+
+# Misc
+*.pxd
