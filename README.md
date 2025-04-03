@@ -1,6 +1,6 @@
 # Application Portal
 
-This project was developed as part of my bachelor thesis at the [Big Data Analytics Group](https://bigdata.uni-saarland.de/index.php) under the supervision of [Prof. Dr. Jens Dittrich](https://bigdata.uni-saarland.de/people/dittrich.php), who gave me the original idea for this project.
+This project was developed as part of my bachelor thesis at the [Big Data Analytics Group](https://bigdata.uni-saarland.de) under the supervision of [Prof. Dr. Jens Dittrich](https://bigdata.uni-saarland.de/people/jensdittrich.html), who gave me the original idea for this project.
 
 The goal was to explore the offline capabilities of web apps in the form of a progressive web app (PWA). To achieve this, I
 created a simple application portal that allows users to either register as students and apply for a course or as staff members to review and accept these applications. The process
@@ -12,9 +12,9 @@ of reviewing, committing, and accepting applications is possible offline and wil
 
 According to the thesis, this repository contains all three web applications separated into their own branches:
 
-- *main*: The fully offline-capable application portal
-- *network-optimized-pwa*: The network-optimized version of the main PWA used in the experiments, containing all related information in the README of the branch
-- *no-pwa*: The version of the application portal without any PWA capabilities used as a baseline in the experiments
+- _main_: The fully offline-capable application portal
+- _network-optimized-pwa_: The network-optimized version of the main PWA used in the experiments, containing all related information in the README of the branch
+- _no-pwa_: The version of the application portal without any PWA capabilities used as a baseline in the experiments
 
 ## Technologies
 
@@ -82,7 +82,7 @@ Replace the `SECRET_KEY` with a random secret key which you can generate in the 
 
 ```bash
 python manage.py shell
-from django.core.management.utils import get_random_secret_key  
+from django.core.management.utils import get_random_secret_key
 get_random_secret_key()
 ```
 
